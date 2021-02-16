@@ -30,7 +30,7 @@ mod lib {
         fn size(&self) -> (i32, i32);
         fn position(&self) -> (i32, i32);
         fn close(&mut self);
-        fn open(&mut self, parent_handle: *mut c_void);
+        fn open(&mut self, parent_handle: *mut c_void) -> bool;
         fn is_open(&mut self) -> bool;
         fn execute(&self, javascript_code: &str) -> Result<(), Box<Error>>;
     }

@@ -449,7 +449,7 @@ impl PluginGui for Gui {
         self.window = None;
     }
 
-    fn open(&mut self, parent_handle: *mut c_void) -> {
+    fn open(&mut self, parent_handle: *mut c_void) -> bool {
         let window = Window::new(parent_handle as HWND, self.window_size);
 
         match WebBrowser::new(
