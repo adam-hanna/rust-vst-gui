@@ -7,7 +7,7 @@ license = "MIT"
 keywords = ["gui", "plugin", "vst", "vst2"]
 
 [dependencies]
-vst = "^0.0"
+vst = "^0.2"
 
 [features]
 modern = ["winrt"]
