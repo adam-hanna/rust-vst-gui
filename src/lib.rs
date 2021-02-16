@@ -61,7 +61,7 @@ impl vst::editor::Editor for PluginGui {
         self.gui.close()
     }
 
-    fn open(&mut self, parent_handle: *mut c_void) {
+    fn open(&mut self, parent_handle: *mut c_void) -> bool {
         self.gui.open(parent_handle)
     }
 
@@ -73,16 +73,18 @@ impl vst::editor::Editor for PluginGui {
 pub use lib::JavascriptCallback;
 
 pub fn new_plugin_gui(
-    html_document: String, js_callback: JavascriptCallback) -> PluginGui
+    html_document: String, 
+    js_callback: JavascriptCallback,
+    window_size: Option<(i32, i32)>) -> PluginGui
 {
     #[cfg(all(windows, not(feature = "modern")))]
     {
-        PluginGui {gui: win32::new_plugin_gui(html_document, js_callback)}
+        PluginGui {gui: win32::new_plugin_gui(html_document, js_callback, window_size)}
     }
 
     #[cfg(all(windows, feature = "modern"))]
     {
         PluginGui {
-            gui: win32_modern::new_plugin_gui(html_document, js_callback)}
+            gui: win32_modern::new_plugin_gui(html_document, js_callback, window_size)}
     }
 }

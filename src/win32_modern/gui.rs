@@ -382,7 +382,8 @@ impl PluginGui for Gui {
 
 pub fn new_plugin_gui(
     html_document: String,
-    js_callback: JavascriptCallback) -> Box<PluginGui>
+    js_callback: JavascriptCallback,
+    window_size: Option<(i32, i32)>) -> Box<PluginGui>
 {
     // TODO: check the return value
     unsafe {RoInitialize(RO_INIT_SINGLETHREADED)};
@@ -393,5 +394,6 @@ pub fn new_plugin_gui(
             js_callback: Arc::new(js_callback),
             web_browser: None,
             window: None,
+            window_size: window_size,
         })
 }
