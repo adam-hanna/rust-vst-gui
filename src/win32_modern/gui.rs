@@ -59,9 +59,10 @@ impl Window {
         0x0070, 0x006c, 0x0075, 0x0067, 0x0069, 0x006e, 0x005f, 0x0077,
         0x0069, 0x006e, 0x0064, 0x006f, 0x0077, 0x0000];
 
-    pub fn new(parent: HWND) -> Window {
+    pub fn new(parent: HWND, size: Option<(i32, i32)>) -> Window {
         Window::register_window_class();
 
+        let window_size = size.unwrap_or_else(|| Window::default_size());
         let handle = unsafe {
             const STYLE: DWORD = WS_CHILD | WS_VISIBLE;
             const STYLE_EXTENDED: DWORD = 0;
@@ -73,8 +74,8 @@ impl Window {
                 STYLE,
                 0, /*x*/
                 0, /*y*/
-                Window::default_size().0,
-                Window::default_size().1,
+                window_size.0,
+                window_size.1,
                 parent,
                 null_mut(), /*menu*/
                 GetModuleHandleW(null()),
@@ -316,6 +317,7 @@ struct Gui {
     js_callback: Arc<JavascriptCallback>,
     web_browser: Option<WebBrowser>,
     window: Option<Window>,
+    window_size: Option<(i32, i32)>,
 }
 
 impl PluginGui for Gui {
@@ -340,31 +342,20 @@ impl PluginGui for Gui {
         }
     }
 
-    fn open(&mut self, parent_handle: *mut c_void) {
-        let window = Window::new(parent_handle as HWND);
+    fn open(&mut self, parent_handle: *mut c_void) -> bool {
+        let window = Window::new(parent_handle as HWND, self.window_size);
 
-        let web_browser = WebBrowser::new(
+        match WebBrowser::new(
             window.handle,
             self.html_document.clone(),
-            self.js_callback.clone()
-        );
-
-        match web_browser {
-            Ok(web_browser) => self.web_browser = Some(web_browser),
-            Err(error) => {
-                let message: Vec<u16> = OsStr::new(error.description())
-                    .encode_wide()
-                    .chain(once(0))
-                    .collect();
-
-                unsafe {
-                    MessageBoxW(
-                        null_mut(), message.as_ptr(), null_mut(), MB_ICONERROR);
-                }
-            }
+            self.js_callback.clone()) {
+            Ok(browser) => {
+                self.window = Some(window);
+                self.web_browser = Some(browser);
+                true
+            },
+            Err(_) => false // TODO: Display errors
         }
-
-        self.window = Some(window);
     }
 
     fn is_open(&mut self) -> bool {
